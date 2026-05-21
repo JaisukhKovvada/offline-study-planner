@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offline AI Study Planner</title>
+
+<style>
+body{
+  font-family:Arial,sans-serif;
+  background:#f5f5f5;
+  margin:0;
+  padding:20px;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+h1{
+  color:#cc5533;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  margin-bottom:16px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  box-sizing:border-box;
+}
+
+button{
+  background:#cc5533;
+  color:white;
+  border:none;
+  padding:14px 20px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+.subject-row{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.subject-row input{
+  flex:1;
+}
+
+.day{
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin-bottom:15px;
+  overflow:hidden;
+}
+
+.day-header{
+  background:#eee;
+  padding:12px;
+  font-weight:bold;
+}
+
+.session{
+  padding:12px;
+  border-top:1px solid #eee;
+}
+
+.tip{
+  padding:8px 0;
+}
+
+@media(max-width:700px){
+  .subject-row{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="card">
+<h1>📘 Smart Study Planner</h1>
+
+<label>Your Name</label>
+<input type="text" id="name" placeholder="Ravi">
+
+<label>Days Until Exam</label>
+<input type="number" id="days" value="7">
+
+<label>Daily Study Hours</label>
+<select id="hours">
+<option>3</option>
+<option>4</option>
+<option selected>5</option>
+<option>6</option>
+<option>8</option>
+</select>
+
+<label>Study Style</label>
+<select id="style">
+<option>Balanced</option>
+<option>Theory Heavy</option>
+<option>Practice Heavy</option>
+<option>Revision Focused</option>
+</select>
+
+<label>Subjects</label>
+
+<div id="subjects">
+
+<div class="subject-row">
+<input type="text" placeholder="Digital Electronics">
+<select>
+<option>Easy</option>
+<option selected>Medium</option>
+<option>Hard</option>
+</select>
+</div>
+
+</div>
+
+<button onclick="addSubject()">+ Add Subject</button>
+
+<br><br>
+
+<label>Weak Areas</label>
+<textarea id="weak" placeholder="MOSFETs, Logic Gates"></textarea>
+
+<button onclick="generatePlan()">Generate Study Plan</button>
+
+</div>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+
+function addSubject(){
+
+  const div = document.createElement("div");
+
+  div.className = "subject-row";
+
+  div.innerHTML = `
+    <input type="text" placeholder="Subject">
+    <select>
+      <option>Easy</option>
+      <option selected>Medium</option>
+      <option>Hard</option>
+    </select>
+  `;
+
+  document.getElementById("subjects").appendChild(div);
+}
+
+function getSubjects(){
+
+  const rows = document.querySelectorAll(".subject-row");
+
+  const subjects = [];
+
+  rows.forEach(row => {
+
+    const name = row.querySelector("input").value.trim();
+
+    const difficulty = row.querySelector("select").value;
+
+    if(name){
+
+      subjects.push({
+        name,
+        difficulty
+      });
+    }
+  });
+
+  return subjects;
+}
+
+function generatePlan(){
+
+  const name = document.getElementById("name").value || "Student";
+
+  const days = parseInt(document.getElementById("days").value);
+
+  const hours = parseInt(document.getElementById("hours").value);
+
+  const style = document.getElementById("style").value;
+
+  const weak = document.getElementById("weak").value;
+
+  const subjects = getSubjects();
+
+  if(subjects.length === 0){
+    alert("Please add subjects");
+    return;
+  }
+
+  const output = document.getElementById("output");
+
+  let html = `
+    <div class="card">
+      <h2>${name}'s Study Plan</h2>
+      <p>
+        Style: <b>${style}</b><br>
+        Daily Hours: <b>${hours}</b><br>
+        Weak Areas: <b>${weak || "None"}</b>
+      </p>
+    </div>
+  `;
+
+  const sessionTemplates = [
+    "Study theory and make short notes",
+    "Practice numericals and problems",
+    "Revise previous topics",
+    "Solve PYQs and mock tests",
+    "Create flashcards and revise formulas"
+  ];
+
+  for(let d = 1; d <= days; d++){
+
+    let sessionsHTML = "";
+
+    const sessionsPerDay = Math.max(3, Math.floor(hours));
+
+    for(let s = 0; s < sessionsPerDay; s++){
+
+      const subject = subjects[(d + s) % subjects.length];
+
+      const task = sessionTemplates[(d + s) % sessionTemplates.length];
+
+      const startHour = 8 + (s * 2);
+
+      sessionsHTML += `
+        <div class="session">
+          <b>${startHour}:00 - ${startHour+1}:30</b><br>
+          <b>${subject.name}</b> (${subject.difficulty})<br>
+          ${task}
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="day">
+        <div class="day-header">
+          Day ${d}
+        </div>
+
+        ${sessionsHTML}
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="card">
+      <h2>📌 Study Tips</h2>
+
+      <div class="tip">• Revise difficult topics daily</div>
+      <div class="tip">• Use Pomodoro method</div>
+      <div class="tip">• Solve previous year questions</div>
+      <div class="tip">• Sleep properly before exams</div>
+      <div class="tip">• Keep one revision day before exam</div>
+    </div>
+  `;
+
+  output.innerHTML = html;
+
+  window.scrollTo({
+    top:document.body.scrollHeight,
+    behavior:"smooth"
+  });
+}
+
+</script>
+
+</body>
+</html>
