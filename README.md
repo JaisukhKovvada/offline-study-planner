@@ -108,28 +108,6 @@ Branch: main
 Folder: /root
 ```
 
-### Step 5
-
-Click:
-
-```text
-Save
-```
-
-Your site will be live at:
-
-```text
-https://your-username.github.io/repository-name/
-```
-
----
-
-## 📱 Screenshot
-
-Add screenshots here later if needed.
-
----
-
 ## 🧠 How It Works
 
 The app generates schedules locally using JavaScript logic.
